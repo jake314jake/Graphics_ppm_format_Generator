@@ -1,0 +1,3 @@
+Tools you need :
+GIMP ----> LINK :https://www.gimp.org/downloads/
+File viewer --> LINK :https://fileviewerplus.com/download
