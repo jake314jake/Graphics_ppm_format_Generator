@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include<vector>
 using namespace std;
 typedef unsigned char byte;
 #define RGB 3;
@@ -323,6 +324,18 @@ public:
 			DrawLine(pointB, pointC, rgb) &&
 			DrawLine(pointA, pointC, rgb)
 			);
+	}
+	// Draw a open and close path from a list of Points
+	bool DrawPath(vector<Point> pts,RGBval rgb, bool isClose) {
+		if (pts.size()==0) return false;
+		Point tmp = pts[0];
+		for (int i = 1; i < pts.size()-1;i++) {
+			DrawLine(tmp, pts[i], rgb);
+			tmp = pts[i];
+			}
+		if(isClose)
+			DrawLine(pts[0], pts[pts.size() - 1], rgb);
+		return true;
 	}
 	// generate a random img
 	bool randImg() {
