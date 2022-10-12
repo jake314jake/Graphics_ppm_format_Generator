@@ -5,9 +5,11 @@
 #include<vector>
 using namespace std;
 typedef unsigned char byte;
+typedef int type;
 #define RGB 3;
 #define ErrMsg "Unable to create "
 #define MaxVal 255
+#define MinVal 0
 #define ASCII "P3"
 /*
 * @2022
@@ -63,28 +65,39 @@ typedef unsigned char byte;
   }
 */
 class Point {
-	int x;
-	int y;
+	type x;
+	type y;
+	type z;
 public:
-	Point(int x, int y) {
-		this->x = x; this->y = y;
+	Point() {
+		this->x = 0; this->y = 0; this->z = 0;
 	}
-	void setX(int x)
+	Point(type x, type y) {
+		this->x = x; this->y = y; this->z = 0;
+	}
+	Point(type x, type y, type z) {
+		Point( x, y);
+		this->z = z;
+	}
+	void setX(type x)
 	{
 		this->x = x;
 	};
-	void setY(int y)
+	void setY(type y)
 	{
 		this->y = y;
 	};
-	int getX()
+	type getX()
 	{
 		return this->x;
 	};
-	int getY()
+	type getY()
 	{
 		return this->y;
 	};
+	type getZ() {
+		return this->z;
+	}
 	void swap(Point &point) {
 		Point tmp = Point(this->getX(), this->getY());
 		this->setX(point.getX()); this->setY(point.getY());
@@ -120,6 +133,41 @@ public:
 	int getB() {
 		return this->B;
 	};
+};
+class Vector {
+	type x, y, z;
+public:
+	Vector(type x, type y, type z) {
+		this->x = x; this->y = y; this->z = z;
+	}
+	Vector(Point startP,Point endP) {
+		this->x = endP.getX() - startP.getX();
+		this->y = endP.getY() - startP.getY();
+		this->z = endP.getZ() - startP.getZ();
+	}
+	type getX() {
+		return this->x;
+	}
+	type getY() {
+		return this->y;
+	}
+	type getZ() {
+		return this->z;
+	}
+	// this.vectProduct(v) --->  this*v ---->( x,y,z )*(x',y',z')=()
+	Vector vectProduct( Vector vector) {
+		return Vector(this->getY() * vector.getZ()- this->getZ() * vector.getY(),
+			          -this->getX() * vector.getZ() + this->getZ() * vector.getX(),
+			           this->getX() * vector.getY() - this->getY() * vector.getX());
+	}
+	//GET THE z OF THIS VECTORIAL vector   
+	type vectProductZ(Vector vector) {
+		return (this->getX() * vector.getY() - this->getY() * vector.getX());
+	}
+	// Z UP OR DOWN
+	int Orientation(Vector vector) {
+		return (vectProductZ(vector)) > 0 ? 1 : -1;
+	}
 };
 class PPMgenerator {
 	int width;
@@ -328,13 +376,15 @@ public:
 	// Draw a open and close path from a list of Points
 	bool DrawPath(vector<Point> pts,RGBval rgb, bool isClose) {
 		if (pts.size()==0) return false;
-		Point tmp = pts[0];
-		for (int i = 1; i < pts.size()-1;i++) {
+		
+		Point tmp = pts[0]; //1-2-3-4-5
+		for (int i = 1; i < pts.size() ; i++) {
 			DrawLine(tmp, pts[i], rgb);
 			tmp = pts[i];
 			}
-		if(isClose)
+		if (isClose)
 			DrawLine(pts[0], pts[pts.size() - 1], rgb);
+		
 		return true;
 	}
 	// generate a random img
@@ -348,6 +398,24 @@ public:
 			}
 		return true;
 	}
+	bool isInTriangel(Point pts,Point a,Point b,Point c) {
+		return (
+			abs(Vector(a, b).Orientation(Vector(a, pts)) +
+				Vector(b, c).Orientation(Vector(b, pts)) +
+				Vector(c, a).Orientation(Vector(c, pts))) == 3
+			);
 	
-	
+	}
+	bool fillTriangel(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0)) {
+		for(int i=0;i<width;i++)
+			for (int j = 0; j < height; j++) {
+				
+				Point tmp = Point(i, j);
+				if (isInTriangel(tmp, pointA, pointB, pointC)) {
+					DrawPixel(tmp, rgb);
+				}
+			}
+		return true;
+	}
+
 };
