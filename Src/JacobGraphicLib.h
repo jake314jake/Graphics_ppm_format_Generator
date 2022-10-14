@@ -74,6 +74,7 @@ public:
 	Point(type x, type y, type z);
 	void setX(type x);;
 	void setY(type y);;
+	void setZ(type z);
 	type getX();;
 	type getY();;
 	type getZ();
@@ -116,6 +117,24 @@ public:
 	Point getPointAt(int Index);
 	vector<Point> getPtsList();
 };
+
+class Transformation {
+protected:
+	 int Base = 3;
+	vector < vector<int>> _Matrix;
+	Transformation();
+};
+class Translation :Transformation {
+private:
+	type xMove, yMove;
+public:
+	Translation(int xMove, int yMove);
+	type getxMove();
+	type getyMove();
+
+	Shape TransShape(Shape shape);
+	Point TransPoint(Point pts);
+};
 class PPMgenerator {
 	int width;
 	int height;
@@ -123,21 +142,22 @@ class PPMgenerator {
 	string url;
 	byte* image_data;
 	ofstream myImage;
+	int backGroundVal;
 public:
 	PPMgenerator(int width, int height, string url, string type = "P3");
 	void setBackGround(int backGroundVal);
-	
+	void setLocation(string url);
 	/* 
 	* set the image array with a Value
 	*/
-	void  setByte(int Value);;
+	void  setByte(int Value);
 	// the image array size
 	int getSize();;
 	// open the image at spsfc url and return TRUE if done
 	//&
 	//close the image
 	bool OpenImg();;
-	void closeImg();;;
+	void closeImg();
 	/*
 	* set the Image Header 
 	* >>type
@@ -164,9 +184,12 @@ public:
 	bool DrawPixel(Point point, RGBval rgb = RGBval(0, 0, 0));
 	bool DrawLine(Point pointStart, Point pointEnd, RGBval rgb = RGBval(0, 0, 0));
 	bool DrawTriangle(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0));
-	bool DrawfShape(Shape shape, RGBval rgb = RGBval(255, 255, 0));
-	// Draw a open and close path from a list of Points
 	bool DrawPath(vector<Point> pts, RGBval rgb, bool isClose);
+	bool DrawShape(Shape shape, RGBval rgb = RGBval(255, 255, 0));
+	bool EraseShape(Shape shape);
+	
+	// Draw a open and close path from a list of Points
+	
 	// generate a random img
 	bool randImg();
 	bool isInTriangel(Point pts, Point a, Point b, Point c);

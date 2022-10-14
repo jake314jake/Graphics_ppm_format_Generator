@@ -23,6 +23,11 @@
 	this->y = y;
 }
 
+ void Point::setZ(type z)
+ {
+	 this->z = z;
+ }
+
  type Point::getX()
 {
 	return this->x;
@@ -84,6 +89,7 @@
 
  void PPMgenerator::setBackGround(int backGroundVal) {
 	if (OpenImg()) {
+		this->backGroundVal = backGroundVal;
 		setImgHeader();
 		setByte(backGroundVal);
 	}
@@ -176,6 +182,11 @@
 /*
 * Check if invalid val &(width*height)||RGb
 */
+
+ void PPMgenerator::setLocation(string url)
+ {
+	 this->url = url;
+ }
 
  bool PPMgenerator::OverFlow(Point point, RGBval rgb) {
 	if (
@@ -286,10 +297,15 @@
 		);
 }
 
- bool PPMgenerator::DrawfShape(Shape shape, RGBval rgb) {
+ bool PPMgenerator::DrawShape(Shape shape, RGBval rgb) {
 	vector<Point> tmp = shape.getPtsList();
 	return DrawPath(tmp, rgb, true);
 }
+
+ bool PPMgenerator::EraseShape(Shape shape)
+ {
+	 return	DrawShape(shape, RGBval(backGroundVal, backGroundVal, backGroundVal));
+ }
 
 // Draw a open and close path from a list of Points
 
@@ -408,3 +424,48 @@
 	}
 	return tmp;
 }
+ 
+
+ Transformation::Transformation() {
+	 for(int i=0;i<Base;i++)
+		 for (int j = 0; j < Base; j++) {
+			 _Matrix.push_back(vector<int>());
+			 if (i == j)
+				 _Matrix.at(i).push_back(1);
+			 else
+				 _Matrix.at(i).push_back(0);
+		 }
+ };
+
+ Translation::Translation(int xMove, int yMove):Transformation() {
+	 this->xMove = xMove;
+	 this->yMove = yMove;
+	 _Matrix.at(0).at(Base - 1) = xMove;
+	 _Matrix.at(1).at(Base - 1) = yMove;
+ }
+
+ type Translation::getxMove()
+	 {
+		 return this->xMove;
+	 }
+ type Translation::getyMove()
+ {
+	 return this->yMove;
+ }
+
+ Shape Translation::TransShape(Shape shape)
+ {
+	 vector <Point> newShapePts;
+	 vector <Point> ShapePts = shape.getPtsList();
+	 for (Point pts : ShapePts) {
+		 newShapePts.push_back(TransPoint(pts));
+	 }
+	 return Shape(newShapePts);
+ }
+
+
+ Point Translation::TransPoint(Point pts) {
+	 return Point(pts.getX() + getxMove()
+		 , pts.getY() + getyMove()
+	 );
+ }
