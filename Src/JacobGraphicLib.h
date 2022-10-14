@@ -69,105 +69,52 @@ class Point {
 	type y;
 	type z;
 public:
-	Point() {
-		this->x = 0; this->y = 0; this->z = 0;
-	}
-	Point(type x, type y) {
-		this->x = x; this->y = y; this->z = 0;
-	}
-	Point(type x, type y, type z) {
-		Point( x, y);
-		this->z = z;
-	}
-	void setX(type x)
-	{
-		this->x = x;
-	};
-	void setY(type y)
-	{
-		this->y = y;
-	};
-	type getX()
-	{
-		return this->x;
-	};
-	type getY()
-	{
-		return this->y;
-	};
-	type getZ() {
-		return this->z;
-	}
-	void swap(Point &point) {
-		Point tmp = Point(this->getX(), this->getY());
-		this->setX(point.getX()); this->setY(point.getY());
-		point.setX(tmp.getX()); point.setY(tmp.getY());
-	}
+	Point();
+	Point(type x, type y);
+	Point(type x, type y, type z);
+	void setX(type x);;
+	void setY(type y);;
+	type getX();;
+	type getY();;
+	type getZ();
+	void swap(Point& point);
 };
 class RGBval {
 	int R;
 	int G;
 	int B;
 public:
-	RGBval(int R, int G, int B) {
-		this->R = R;
-		this->G = G;
-		this->B = B;
-	}
-	void setR(int R)
-	{
-		this->R = R;
-	};
-	void setG(int G) {
-		this->G = G;
-	};
-	void setB(int B) {
-		this->B = B;
-	};
-	int getR() {
-		return this->R;
-	};
-	int getG() {
-		return this->G;
-	};
-	int getB() {
-		return this->B;
-	};
+	RGBval(int R, int G, int B);
+	void setR(int R);;
+	void setG(int G);;
+	void setB(int B);;
+	int getR();;
+	int getG();;
+	int getB();;
 };
 class Vector {
 	type x, y, z;
 public:
-	Vector(type x, type y, type z) {
-		this->x = x; this->y = y; this->z = z;
-	}
-	Vector(Point startP,Point endP) {
-		this->x = endP.getX() - startP.getX();
-		this->y = endP.getY() - startP.getY();
-		this->z = endP.getZ() - startP.getZ();
-	}
-	type getX() {
-		return this->x;
-	}
-	type getY() {
-		return this->y;
-	}
-	type getZ() {
-		return this->z;
-	}
+	Vector(type x, type y, type z);
+	Vector(Point startP, Point endP);
+	type getX();
+	type getY();
+	type getZ();
 	// this.vectProduct(v) --->  this*v ---->( x,y,z )*(x',y',z')=()
-	Vector vectProduct( Vector vector) {
-		return Vector(this->getY() * vector.getZ()- this->getZ() * vector.getY(),
-			          -this->getX() * vector.getZ() + this->getZ() * vector.getX(),
-			           this->getX() * vector.getY() - this->getY() * vector.getX());
-	}
+	Vector vectProduct(Vector vector);
 	//GET THE z OF THIS VECTORIAL vector   
-	type vectProductZ(Vector vector) {
-		return (this->getX() * vector.getY() - this->getY() * vector.getX());
-	}
+	type vectProductZ(Vector vector);
 	// Z UP OR DOWN
-	int Orientation(Vector vector) {
-		return (vectProductZ(vector)) > 0 ? 1 : -1;
-	}
+	int Orientation(Vector vector);
+};
+class Shape {
+	protected:
+	vector<Point> PtsList;
+public:
+	Shape(vector<Point> PtsList);
+	int getShapePtsSize();
+	Point getPointAt(int Index);
+	vector<Point> getPtsList();
 };
 class PPMgenerator {
 	int width;
@@ -177,76 +124,31 @@ class PPMgenerator {
 	byte* image_data;
 	ofstream myImage;
 public:
-	PPMgenerator(int width, int height, string url,string type = "P3") {
-		this->width = width;
-		this->height = height;
-		this->type = type;
-		this->url = url;
-		image_data = new byte[ getSize()];
-	}
-	void setBackGround(int backGroundVal) {
-		if (OpenImg()) {
-		setImgHeader();
-		setByte(backGroundVal);
-	}
-	}
+	PPMgenerator(int width, int height, string url, string type = "P3");
+	void setBackGround(int backGroundVal);
 	
 	/* 
 	* set the image array with a Value
 	*/
-	void  setByte(int Value)
-	{
-		if (Value > MaxVal || image_data == 0)
-			return;
-		memset(image_data, Value, getSize());
-	};
+	void  setByte(int Value);;
 	// the image array size
-	int getSize()
-	{
-		return width * height * RGB;
-	};
+	int getSize();;
 	// open the image at spsfc url and return TRUE if done
 	//&
 	//close the image
-	bool OpenImg()
-	{
-		myImage.open(url);
-		if (myImage.fail()) {
-			cout << ErrMsg << " " << url << endl;
-			return false;
-		}
-		return true;
-	};
-	void closeImg() {
-		writeImg();
-		myImage.close();
-	};;
+	bool OpenImg();;
+	void closeImg();;;
 	/*
 	* set the Image Header 
 	* >>type
 	* >>width height
 	* >>MaxVal
 	*/
-	void setImgHeader() {
-		
-		myImage << type <<" "<< endl;
-		myImage << width << " " << height <<" " <<endl;
-		myImage << MaxVal << " "<<endl;
-		
-	}
+	void setImgHeader();
 	/*
 	* write in the image file from the byte array
 	*/
-	bool writeImg() {
-		
-			for (int i = 0; i < getSize(); i++) {
-				int value = image_data[i];
-				myImage << value << " " << endl;
-			}
-			
-			return true;
-		
-	};
+	bool writeImg();;
 	/*
 	* test if the parm greater than MaxVal
 	*/
@@ -254,168 +156,21 @@ public:
 	/*
 	* set  byte Array with a RGB val 
 	*/
-	void setPixel(Point point, RGBval rgb)
-	{
-		{
-			
-			Point tmp = Point((height - 1) - point.getY(),point.getX());
-			int pixel = ((width * tmp.getX() )+ tmp.getY()) * RGB;
-			image_data[pixel] = rgb.getR();
-			image_data[pixel + 1] = rgb.getG(); 
-			image_data[pixel + 2] = rgb.getB();
-		}
-	};
+	void setPixel(Point point, RGBval rgb);;
 	/*
 	* Check if invalid val &(width*height)||RGb
 	*/
-	bool OverFlow(Point point, RGBval rgb = RGBval(0, 0, 0)) {
-		if (
-			point.getX() >= width ||
-			point.getX() >= height ||
-			rgb.getR() > MaxVal ||
-			rgb.getG() > MaxVal ||
-			rgb.getB() > MaxVal) return true;
-
-		return false;
-	}
-	bool DrawPixel(Point point, RGBval rgb= RGBval(0, 0, 0)) {
-		
-		if (OverFlow(point, rgb)) return false;
-			setPixel(point, rgb);
-			return true;
-		
-		
-	}
-	bool DrawLine(Point pointStart, Point pointEnd, RGBval rgb=RGBval(0,0,0)) {
-		if (OverFlow(pointStart, rgb) || OverFlow(pointEnd)) return false;
-		
-		/* Possible Lines after swap && overrflow control
-		* case 1: if (Y_Start - Y_End) == 0 >> tangAlpha==0
-		*    Start*************End   
-		*case 2: if (X_Start - X_End) == 0 >> tangAlpha== INFN
-		*        End*
-		*           *
-		*           *
-		*           *
-		*           *
-		*     Start *
-		* case 3: tangAlpha > 0
-		*                   *End          yi - y_Start
-		*                 *            a=-----------   
-		*              *                  xi - x_Start            
-		*           *                  yi=(xi - x_Start)*a + y_Start   
-		*    Start*                    yi=i*a + y_Start
-		* case 3: tangAlpha < 0        also:
-		*                               xi=(yi - y_Start)/a + x_Start   
-		*                               xi=i/a +x_Start 
-		*      Start*
-		*             *                
-		*               * 
-		*                 *
-		*                   *End
-		* 
-		*/
-		int Dx = pointStart.getX() - pointEnd.getX();
-		int Dy = pointStart.getY() - pointEnd.getY() ;
-		if (!Dx) {
-			if (pointStart.getY() > pointEnd.getY()) pointStart.swap(pointEnd);
-			for (int i = pointStart.getY(); i <= pointEnd.getY(); i++) {
-				DrawPixel(Point(pointStart.getX(), i), rgb);
-			}
-			return true;
-		}
-		if (!Dy) {
-			if (pointStart.getX() > pointEnd.getX()) pointStart.swap(pointEnd);
-			for (int i = pointStart.getX(); i <= pointEnd.getX(); i++) {
-				DrawPixel(Point(i, pointStart.getY()), rgb);
-			}
-			return true;
-		}
-		
-		
-		
-		float tangAlp = float(Dy) / (Dx);
-		Dx = abs(Dx);
-		Dy = abs(Dy);
-		//this give us a wide range in Dx
-		if (Dx >= Dy) {
-			
-			if (pointStart.getX() > pointEnd.getX()) pointStart.swap(pointEnd);
-			float y = (float)pointStart.getY();
-			for (int i = pointStart.getX(); i <= pointEnd.getX(); i++) {
-				DrawPixel(Point(i, y), rgb);
-				y += tangAlp;
-
-			}
-			return true;
-		}
-		//this give us a wide range in Dy
-		else if (Dx < Dy) {
-			
-			if (pointStart.getY() > pointEnd.getY())  pointStart.swap(pointEnd);
-			float x = (float)pointStart.getX();
-			for (int i = pointStart.getY(); i <= pointEnd.getY(); i++) {
-				DrawPixel(Point(x, i), rgb);
-				x += (float) 1 / tangAlp;
-			}
-			return true;
-		}
-		else {
-			DrawPixel(pointStart, rgb);
-			return true;
-		};
-		return false;
-	}
-	bool DrawTriangle(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0)) {
-		return(
-			DrawLine(pointA, pointB, rgb) &&
-			DrawLine(pointB, pointC, rgb) &&
-			DrawLine(pointA, pointC, rgb)
-			);
-	}
+	bool OverFlow(Point point, RGBval rgb = RGBval(0, 0, 0));
+	bool DrawPixel(Point point, RGBval rgb = RGBval(0, 0, 0));
+	bool DrawLine(Point pointStart, Point pointEnd, RGBval rgb = RGBval(0, 0, 0));
+	bool DrawTriangle(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0));
+	bool DrawfShape(Shape shape, RGBval rgb = RGBval(255, 255, 0));
 	// Draw a open and close path from a list of Points
-	bool DrawPath(vector<Point> pts,RGBval rgb, bool isClose) {
-		if (pts.size()==0) return false;
-		
-		Point tmp = pts[0]; //1-2-3-4-5
-		for (int i = 1; i < pts.size() ; i++) {
-			DrawLine(tmp, pts[i], rgb);
-			tmp = pts[i];
-			}
-		if (isClose)
-			DrawLine(pts[0], pts[pts.size() - 1], rgb);
-		
-		return true;
-	}
+	bool DrawPath(vector<Point> pts, RGBval rgb, bool isClose);
 	// generate a random img
-	bool randImg() {
-		srand(time(0));
-		for(int i=0;i<width;i++)
-			for (int j = 0; j < height; j++)
-			{
-				
-				setPixel(Point(i, j), RGBval(rand() % 255, rand() % 255, rand() % 255));
-			}
-		return true;
-	}
-	bool isInTriangel(Point pts,Point a,Point b,Point c) {
-		return (
-			abs(Vector(a, b).Orientation(Vector(a, pts)) +
-				Vector(b, c).Orientation(Vector(b, pts)) +
-				Vector(c, a).Orientation(Vector(c, pts))) == 3
-			);
-	
-	}
-	bool fillTriangel(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0)) {
-		for(int i=0;i<width;i++)
-			for (int j = 0; j < height; j++) {
-				
-				Point tmp = Point(i, j);
-				if (isInTriangel(tmp, pointA, pointB, pointC)) {
-					DrawPixel(tmp, rgb);
-				}
-			}
-		return true;
-	}
+	bool randImg();
+	bool isInTriangel(Point pts, Point a, Point b, Point c);
+	bool fillTriangel(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0));
 
 };
+
