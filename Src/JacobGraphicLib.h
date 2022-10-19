@@ -11,6 +11,7 @@ typedef int type;
 #define MaxVal 255
 #define MinVal 0
 #define ASCII "P3"
+#define PI 	3.14159265358979323846
 /*
 * @2022
 * this Lib WAS created for genrating  PPM files 
@@ -116,12 +117,13 @@ public:
 	int getShapePtsSize();
 	Point getPointAt(int Index);
 	vector<Point> getPtsList();
+	
 };
 
 class Transformation {
 protected:
 	 int Base = 3;
-	vector < vector<int>> _Matrix;
+	vector < vector<float>> _Matrix;
 	Transformation();
 };
 class Translation :Transformation {
@@ -134,6 +136,71 @@ public:
 
 	Shape TransShape(Shape shape);
 	Point TransPoint(Point pts);
+};
+class Rotation :Transformation {
+/// <summary>
+///  pi ----> 180
+///  alpHa -----> n
+/// </summary>
+private:
+	float aLpha;
+public:
+	Rotation(type aLpha) {
+		this->aLpha = aLpha;
+	}
+	float getaLpha() {
+		return this->aLpha;
+	}
+	float getRADaLpha() {
+		return float((getaLpha() * PI) / 180);
+	}
+	Point RotPoint(Point pts) {
+		return Point(cos(getRADaLpha()) * pts.getX() - sin(getRADaLpha()) * pts.getY()
+			, sin(getRADaLpha()) * pts.getX() + cos(getRADaLpha()) * pts.getY()
+		);
+	}
+	Shape RotShape(Shape shape) {
+		vector <Point> newShapePts;
+		vector <Point> ShapePts = shape.getPtsList();
+		for (Point pts : ShapePts) {
+			newShapePts.push_back(RotPoint(pts));
+		}
+		return Shape(newShapePts);
+	};
+	
+
+};
+class Scale : Transformation{
+private:
+
+	float xScale, yScale;
+public:
+	Scale(float xScale, float yScale) {
+		this->xScale = xScale; this->yScale = yScale;
+
+	}
+	float getxScale() {
+		return this->xScale;
+	};
+	float getyScale() {
+		return this->yScale;
+	};
+	Point ScalePoint(Point pts) {
+		return Point( getxScale() * pts.getX()
+			        , getyScale() * pts.getY()
+		);
+
+	}
+	Shape ScaleShape(Shape shape) {
+		vector <Point> newShapePts;
+		vector <Point> ShapePts = shape.getPtsList();
+		for (Point pts : ShapePts) {
+			
+			newShapePts.push_back(ScalePoint(pts));
+		}
+		return Shape(newShapePts);
+	};
+
 };
 class PPMgenerator {
 	int width;
