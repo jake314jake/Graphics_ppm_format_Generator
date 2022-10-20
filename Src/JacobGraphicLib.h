@@ -12,6 +12,11 @@ typedef int type;
 #define MinVal 0
 #define ASCII "P3"
 #define PI 	3.14159265358979323846
+#define _NoOverFlow 0
+#define _OverFloxXpos 1
+#define _OverFloxXneg -1
+#define _OverFloxYpos  2 
+#define _OverFloxYneg -2
 /*
 * @2022
 * this Lib WAS created for genrating  PPM files 
@@ -117,7 +122,7 @@ public:
 	int getShapePtsSize();
 	Point getPointAt(int Index);
 	vector<Point> getPtsList();
-	
+
 };
 
 class Transformation {
@@ -125,17 +130,25 @@ protected:
 	 int Base = 3;
 	vector < vector<float>> _Matrix;
 	Transformation();
+	void loadIden();
+public:
+	virtual Shape set(Shape shape) = 0;
+	
 };
 class Translation :Transformation {
 private:
 	type xMove, yMove;
+	Shape TransShape(Shape shape);
+	Point TransPoint(Point pts);
 public:
 	Translation(int xMove, int yMove);
 	type getxMove();
 	type getyMove();
 
-	Shape TransShape(Shape shape);
-	Point TransPoint(Point pts);
+	
+	Shape set(Shape shape) {
+		return TransShape( shape);
+	}
 };
 class Rotation :Transformation {
 /// <summary>
@@ -144,16 +157,6 @@ class Rotation :Transformation {
 /// </summary>
 private:
 	float aLpha;
-public:
-	Rotation(type aLpha) {
-		this->aLpha = aLpha;
-	}
-	float getaLpha() {
-		return this->aLpha;
-	}
-	float getRADaLpha() {
-		return float((getaLpha() * PI) / 180);
-	}
 	Point RotPoint(Point pts) {
 		return Point(cos(getRADaLpha()) * pts.getX() - sin(getRADaLpha()) * pts.getY()
 			, sin(getRADaLpha()) * pts.getX() + cos(getRADaLpha()) * pts.getY()
@@ -167,17 +170,47 @@ public:
 		}
 		return Shape(newShapePts);
 	};
+public:
+	Rotation(type aLpha):Transformation() {
+		this->aLpha = aLpha;
+		_Matrix.at(0).at(0) = cos(getRADaLpha());
+		_Matrix.at(0).at(1) = -sin(getRADaLpha());
+		_Matrix.at(1).at(0) = cos(getRADaLpha());
+		_Matrix.at(1).at(1) = sin(getRADaLpha());
+		
+	}
+	float getaLpha() {
+		return this->aLpha;
+	}
+	float getRADaLpha() {
+		return float((getaLpha() * PI) / 180);
+	}
 	
+
+	Shape set(Shape shape) {
+		return RotShape(shape);
+	}
 
 };
 class Scale : Transformation{
 private:
 
 	float xScale, yScale;
-public:
-	Scale(float xScale, float yScale) {
-		this->xScale = xScale; this->yScale = yScale;
+	Point ScalePoint(Point pts);
+	Shape ScaleShape(Shape shape) {
+		vector <Point> newShapePts;
+		vector <Point> ShapePts = shape.getPtsList();
+		for (Point pts : ShapePts) {
 
+			newShapePts.push_back(ScalePoint(pts));
+		}
+		return Shape(newShapePts);
+	};
+public:
+	Scale(float xScale, float yScale):Transformation() {
+		this->xScale = xScale; this->yScale = yScale;
+		_Matrix.at(0).at(0) = xScale;
+		_Matrix.at(1).at(1) = yScale;
 	}
 	float getxScale() {
 		return this->xScale;
@@ -185,21 +218,10 @@ public:
 	float getyScale() {
 		return this->yScale;
 	};
-	Point ScalePoint(Point pts) {
-		return Point( getxScale() * pts.getX()
-			        , getyScale() * pts.getY()
-		);
-
+	
+	Shape set(Shape shape) {
+		return ScaleShape(shape);
 	}
-	Shape ScaleShape(Shape shape) {
-		vector <Point> newShapePts;
-		vector <Point> ShapePts = shape.getPtsList();
-		for (Point pts : ShapePts) {
-			
-			newShapePts.push_back(ScalePoint(pts));
-		}
-		return Shape(newShapePts);
-	};
 
 };
 class PPMgenerator {
@@ -247,7 +269,8 @@ public:
 	/*
 	* Check if invalid val &(width*height)||RGb
 	*/
-	bool OverFlow(Point point, RGBval rgb = RGBval(0, 0, 0));
+	int OverFlow(Point point);
+	
 	bool DrawPixel(Point point, RGBval rgb = RGBval(0, 0, 0));
 	bool DrawLine(Point pointStart, Point pointEnd, RGBval rgb = RGBval(0, 0, 0));
 	bool DrawTriangle(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0));

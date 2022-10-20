@@ -188,28 +188,27 @@
 	 this->url = url;
  }
 
- bool PPMgenerator::OverFlow(Point point, RGBval rgb) {
-	if (
-		point.getX() >= width ||
-		point.getX() >= height ||
-		rgb.getR() > MaxVal ||
-		rgb.getG() > MaxVal ||
-		rgb.getB() > MaxVal) return true;
-
-	return false;
+ int PPMgenerator::OverFlow(Point point) {
+	 {
+		if(point.getX() >= width) return _OverFloxXpos;
+		if(point.getY() >= height) return _OverFloxYpos;
+		if(point.getX() < 0)       return _OverFloxXneg;
+		if (point.getY() < 0)       return _OverFloxYneg;
+	 }
+	return _NoOverFlow;
 }
 
  bool PPMgenerator::DrawPixel(Point point, RGBval rgb) {
 
-	if (OverFlow(point, rgb)) return false;
-	setPixel(point, rgb);
+	if (OverFlow(point)==_NoOverFlow );
+	     setPixel(point, rgb);
 	return true;
 
 
 }
 
  bool PPMgenerator::DrawLine(Point pointStart, Point pointEnd, RGBval rgb) {
-	if (OverFlow(pointStart, rgb) || OverFlow(pointEnd)) return false;
+	
 
 	/* Possible Lines after swap && overrflow control
 	* case 1: if (Y_Start - Y_End) == 0 >> tangAlpha==0
@@ -242,6 +241,7 @@
 	if (!Dx) {
 		if (pointStart.getY() > pointEnd.getY()) pointStart.swap(pointEnd);
 		for (int i = pointStart.getY(); i <= pointEnd.getY(); i++) {
+			if(i>=0 && i<height)
 			DrawPixel(Point(pointStart.getX(), i), rgb);
 		}
 		return true;
@@ -249,6 +249,7 @@
 	if (!Dy) {
 		if (pointStart.getX() > pointEnd.getX()) pointStart.swap(pointEnd);
 		for (int i = pointStart.getX(); i <= pointEnd.getX(); i++) {
+			if (i >= 0 && i < width)
 			DrawPixel(Point(i, pointStart.getY()), rgb);
 		}
 		return true;
@@ -265,8 +266,10 @@
 		if (pointStart.getX() > pointEnd.getX()) pointStart.swap(pointEnd);
 		float y = (float)pointStart.getY();
 		for (int i = pointStart.getX(); i <= pointEnd.getX(); i++) {
-			DrawPixel(Point(i, y), rgb);
-			y += tangAlp;
+			if (i >= 0 && i < width && y>=0 && y<height) {
+				DrawPixel(Point(i, y), rgb);
+				y += tangAlp;
+			}
 
 		}
 		return true;
@@ -277,8 +280,10 @@
 		if (pointStart.getY() > pointEnd.getY())  pointStart.swap(pointEnd);
 		float x = (float)pointStart.getX();
 		for (int i = pointStart.getY(); i <= pointEnd.getY(); i++) {
-			DrawPixel(Point(x, i), rgb);
-			x += (float)1 / tangAlp;
+			if (x >= 0 && x < width && i >= 0 && i < height) {
+				DrawPixel(Point(x, i), rgb);
+				x += (float)1 / tangAlp;
+			}
 		}
 		return true;
 	}
@@ -402,9 +407,11 @@
 }
 
  Shape::Shape(vector<Point> PtsList) {
+
 	if (!PtsList.empty()) {
 		for (Point pts : PtsList) {
 			this->PtsList.push_back(pts);
+			cout << pts.getX() << "  " << pts.getY() << endl;
 		}
 	}
 }
@@ -424,18 +431,25 @@
 	}
 	return tmp;
 }
+
+ 
  
 
  Transformation::Transformation() {
-	 for(int i=0;i<Base;i++)
+	 loadIden();
+ }
+ void Transformation::loadIden()
+ {
+	 for (int i = 0; i < Base; i++)
 		 for (int j = 0; j < Base; j++) {
-			 _Matrix.push_back(vector<int>());
+			 _Matrix.push_back(vector<float>());
 			 if (i == j)
 				 _Matrix.at(i).push_back(1);
 			 else
 				 _Matrix.at(i).push_back(0);
 		 }
- };
+ }
+ 
 
  Translation::Translation(int xMove, int yMove):Transformation() {
 	 this->xMove = xMove;
@@ -465,7 +479,15 @@
 
 
  Point Translation::TransPoint(Point pts) {
-	 return Point(pts.getX() + getxMove()
+	 Point tmp= Point(pts.getX() + getxMove()
 		 , pts.getY() + getyMove()
 	 );
+	 return tmp;
+ }
+
+ inline Point Scale::ScalePoint(Point pts) {
+	 return Point((getxScale() * pts.getX())
+		 , (getyScale() * pts.getY())
+	 );
+
  }
