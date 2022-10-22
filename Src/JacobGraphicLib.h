@@ -37,7 +37,7 @@ typedef int type;
 	 |W|W|W|
   PPM FILE WOULD BE LIKE:
   >>TEST.ppm
-       ************************************************ 
+	   ************************************************
 	  * P3     // HEADER FILE BGN                     *
 	  * 3 3                                           *
 	  * 255   // HEADER FILE END
@@ -66,8 +66,8 @@ typedef int type;
 	  * 255
 	  * 255
 	  * 255
-	  ************************************************ 
-	 
+	  ************************************************
+
   }
 */
 class Point {
@@ -81,8 +81,8 @@ public:
 	void setX(type x);;
 	void setY(type y);;
 	void setZ(type z);
-	type getX();;
-	type getY();;
+	type getX();
+	type getY();
 	type getZ();
 	void swap(Point& point);
 };
@@ -92,12 +92,20 @@ class RGBval {
 	int B;
 public:
 	RGBval(int R, int G, int B);
-	void setR(int R);;
-	void setG(int G);;
-	void setB(int B);;
-	int getR();;
-	int getG();;
-	int getB();;
+	void setR(int R);
+	void setG(int G);
+	void setB(int B);
+	int getR();
+	int getG();
+	int getB();
+	bool isEqual(RGBval rgb) {
+		
+		return (
+			   R == rgb.getR()
+			&& G == rgb.getG()
+			&& B == rgb.getB()
+			);
+	}
 };
 class Vector {
 	type x, y, z;
@@ -115,16 +123,60 @@ public:
 	int Orientation(Vector vector);
 };
 class Shape {
-	protected:
+protected:
 	vector<Point> PtsList;
+	RGBval Boundary_color = RGBval(100, 100, 100);
 public:
 	Shape(vector<Point> PtsList);
 	int getShapePtsSize();
 	Point getPointAt(int Index);
 	vector<Point> getPtsList();
-
+	void setBoundary_color(RGBval Boundary_color = RGBval(255, 255, 0)) {
+		this->Boundary_color = Boundary_color;
+	}
+	RGBval getBoundary_color() {
+		return this->Boundary_color;
+	}
+	type minX() {
+		type minX = PtsList.at(0).getX();
+		for (Point pts : PtsList) {
+			if (pts.getX() < minX){
+			minX = pts.getX();
+          }
+		}
+		return minX;
+	}
+	type maxX() {
+		type maxX = PtsList.at(0).getX();
+		for (Point pts : PtsList) {
+			if (pts.getX() > maxX) {
+				maxX = pts.getX();
+			}
+		}
+		return maxX;
+	}
+	type minY() {
+		type minY = PtsList.at(0).getY();
+		for (Point pts : PtsList) {
+			if (pts.getY() < minY) {
+				minY = pts.getY();
+			}
+		}
+		return minY;
+	}
+	type maxY() {
+		type maxY = PtsList.at(0).getY();
+		for (Point pts : PtsList) {
+			if (pts.getY() > maxY) {
+				maxY = pts.getY();
+			}
+		}
+		return maxY;
+	}
+	Point pointIn() {
+		return Point((minX() + maxX()) / 2, (minY() + maxY()) / 2);
+	}
 };
-
 class Transformation {
 protected:
 	 int Base = 3;
@@ -144,11 +196,7 @@ public:
 	Translation(int xMove, int yMove);
 	type getxMove();
 	type getyMove();
-
-	
-	Shape set(Shape shape) {
-		return TransShape( shape);
-	}
+	Shape set(Shape shape);
 };
 class Rotation :Transformation {
 /// <summary>
@@ -157,39 +205,15 @@ class Rotation :Transformation {
 /// </summary>
 private:
 	float aLpha;
-	Point RotPoint(Point pts) {
-		return Point(cos(getRADaLpha()) * pts.getX() - sin(getRADaLpha()) * pts.getY()
-			, sin(getRADaLpha()) * pts.getX() + cos(getRADaLpha()) * pts.getY()
-		);
-	}
-	Shape RotShape(Shape shape) {
-		vector <Point> newShapePts;
-		vector <Point> ShapePts = shape.getPtsList();
-		for (Point pts : ShapePts) {
-			newShapePts.push_back(RotPoint(pts));
-		}
-		return Shape(newShapePts);
-	};
+	Point RotPoint(Point pts);
+	Shape RotShape(Shape shape);
 public:
-	Rotation(type aLpha):Transformation() {
-		this->aLpha = aLpha;
-		_Matrix.at(0).at(0) = cos(getRADaLpha());
-		_Matrix.at(0).at(1) = -sin(getRADaLpha());
-		_Matrix.at(1).at(0) = cos(getRADaLpha());
-		_Matrix.at(1).at(1) = sin(getRADaLpha());
-		
-	}
-	float getaLpha() {
-		return this->aLpha;
-	}
-	float getRADaLpha() {
-		return float((getaLpha() * PI) / 180);
-	}
+	Rotation(type aLpha);
+	float getaLpha();
+	float getRADaLpha();
 	
 
-	Shape set(Shape shape) {
-		return RotShape(shape);
-	}
+	Shape set(Shape shape);
 
 };
 class Scale : Transformation{
@@ -266,6 +290,7 @@ public:
 	* set  byte Array with a RGB val 
 	*/
 	void setPixel(Point point, RGBval rgb);;
+	RGBval getPixel(Point point);
 	/*
 	* Check if invalid val &(width*height)||RGb
 	*/
@@ -275,8 +300,9 @@ public:
 	bool DrawLine(Point pointStart, Point pointEnd, RGBval rgb = RGBval(0, 0, 0));
 	bool DrawTriangle(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0));
 	bool DrawPath(vector<Point> pts, RGBval rgb, bool isClose);
-	bool DrawShape(Shape shape, RGBval rgb = RGBval(255, 255, 0));
-	bool EraseShape(Shape shape);
+	bool DrawShape(Shape shape);
+	bool DrawShape(Shape shape, RGBval rgb );
+	bool EraseShape(Shape shape,bool isEmpty = true);
 	
 	// Draw a open and close path from a list of Points
 	
@@ -284,6 +310,17 @@ public:
 	bool randImg();
 	bool isInTriangel(Point pts, Point a, Point b, Point c);
 	bool fillTriangel(Point pointA, Point pointB, Point pointC, RGBval rgb = RGBval(0, 0, 0));
+	void fillShape(Shape shape, Point pts, RGBval fill_color) {
+		if(!shape.getBoundary_color().isEqual(getPixel(pts)) &&
+			! fill_color.isEqual(getPixel(pts)) ) {
+			setPixel(pts, fill_color);
+			fillShape(shape, Point(pts.getX()+1,pts.getY()), fill_color);
+			fillShape(shape, Point(pts.getX()-1, pts.getY()), fill_color);
+			fillShape(shape, Point(pts.getX(), pts.getY()+1), fill_color);
+			fillShape(shape, Point(pts.getX(), pts.getY()-1), fill_color);
+		}
+		return;
+	}
+	};
 
-};
 

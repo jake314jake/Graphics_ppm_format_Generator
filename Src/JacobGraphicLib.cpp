@@ -177,7 +177,19 @@
 		image_data[pixel + 2] = rgb.getB();
 	}
 }
-
+ RGBval  PPMgenerator::getPixel(Point point)
+ {
+	 {
+		 if (OverFlow(point) == _NoOverFlow) {
+			 Point tmp = Point((height - 1) - point.getY(), point.getX());
+			 int pixel = ((width * tmp.getX()) + tmp.getY()) * RGB;
+			 return RGBval(image_data[pixel],
+				 image_data[pixel + 1],
+				 image_data[pixel + 2]);
+		 }
+		 
+	 }
+ }
 
 /*
 * Check if invalid val &(width*height)||RGb
@@ -302,13 +314,19 @@
 		);
 }
 
- bool PPMgenerator::DrawShape(Shape shape, RGBval rgb) {
+ bool PPMgenerator::DrawShape(Shape shape) {
 	vector<Point> tmp = shape.getPtsList();
-	return DrawPath(tmp, rgb, true);
+	return DrawPath(tmp, shape.getBoundary_color(), true);
 }
-
- bool PPMgenerator::EraseShape(Shape shape)
- {
+ bool PPMgenerator::DrawShape(Shape shape,RGBval rgb) {
+	 vector<Point> tmp = shape.getPtsList();
+	 return DrawPath(tmp, rgb, true);
+ }
+ bool PPMgenerator::EraseShape(Shape shape,bool isEmpty)
+ {    
+	 if (!isEmpty) {
+		 fillShape(shape, shape.pointIn(), RGBval(backGroundVal, backGroundVal, backGroundVal));
+	 }
 	 return	DrawShape(shape, RGBval(backGroundVal, backGroundVal, backGroundVal));
  }
 
@@ -431,10 +449,6 @@
 	}
 	return tmp;
 }
-
- 
- 
-
  Transformation::Transformation() {
 	 loadIden();
  }
@@ -485,9 +499,53 @@
 	 return tmp;
  }
 
+ Shape Translation::set(Shape shape)
+ {
+	 return TransShape(shape);
+ };
+
  inline Point Scale::ScalePoint(Point pts) {
 	 return Point((getxScale() * pts.getX())
 		 , (getyScale() * pts.getY())
 	 );
 
  }
+
+ Point Rotation::RotPoint(Point pts)
+ {
+	 return Point(cos(getRADaLpha()) * pts.getX() - sin(getRADaLpha()) * pts.getY()
+		 , sin(getRADaLpha()) * pts.getX() + cos(getRADaLpha()) * pts.getY()
+	 );
+ }
+
+ Shape Rotation::RotShape(Shape shape)
+ {
+	 vector <Point> newShapePts;
+	 vector <Point> ShapePts = shape.getPtsList();
+	 for (Point pts : ShapePts) {
+		 newShapePts.push_back(RotPoint(pts));
+	 }
+	 return Shape(newShapePts);
+ }
+ Rotation::Rotation(type aLpha)
+	 :Transformation() {
+	 this->aLpha = aLpha;
+	 _Matrix.at(0).at(0) = cos(getRADaLpha());
+	 _Matrix.at(0).at(1) = -sin(getRADaLpha());
+	 _Matrix.at(1).at(0) = cos(getRADaLpha());
+	 _Matrix.at(1).at(1) = sin(getRADaLpha());
+
+ }
+ float Rotation::getaLpha()
+ {
+	 return this->aLpha;
+ }
+ float Rotation::getRADaLpha()
+ {
+	 return float((getaLpha() * PI) / 180);
+ }
+ Shape Rotation::set(Shape shape)
+ {
+	 return RotShape(shape);
+ }
+ ;
